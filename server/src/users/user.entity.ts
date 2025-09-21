@@ -1,4 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Task } from 'src/tasks/task.entity';
+import { OneToMany } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -29,4 +31,7 @@ export class User {
     default: UserRole.MEMBER,
   })
   role: UserRole;
+
+  @OneToMany(() => Task, (task) => task.user, { eager: true })
+  tasks: Task[];
 }
