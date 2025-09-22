@@ -4,6 +4,7 @@ import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { Task, TaskDifficulty, TaskStatus } from './task.entity';
+import { Project } from 'src/projects/project.entity';
 
 @Injectable()
 export class TasksService {
@@ -12,6 +13,8 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Project)
+    private projectsRepository: Repository<Project>,
     private usersService: UsersService,
   ) {}
 
@@ -56,9 +59,18 @@ export class TasksService {
     return this.tasksRepository.save(task);
   }
 
-  async createTask(createTaskDto: any, user: User): Promise<Task> {
+  async createTask(createTaskDto: any, projectId: string, user: User): Promise<Task> {
+    const project = await this.projectsRepository.findOne({ where: { id: projectId }, relations: ['members'] });
+    if (!project) {
+        throw new NotFoundException('Project not found');
+    }
+
+    const isMember = project.members.some(member => member.id === user.id);
+    if (!isMember) {
+        throw new UnauthorizedException('You are not a member of this project');
+    }
+
     const { title, description, difficulty } = createTaskDto;
-    
     const xpValue = this.getXpForDifficulty(difficulty);
 
     const task = this.tasksRepository.create({
@@ -66,7 +78,8 @@ export class TasksService {
       description,
       difficulty,
       xpValue,
-      user,
+      project,
+      assignees: [],
     });
 
     return this.tasksRepository.save(task);
