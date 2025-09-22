@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Task } from 'src/tasks/task.entity';
 import { OneToMany } from 'typeorm';
+import { Project } from 'src/projects/project.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -34,4 +35,14 @@ export class User {
 
   @OneToMany(() => Task, (task) => task.user, { eager: true })
   tasks: Task[];
+
+  @OneToMany(() => Project, project => project.owner)
+  ownedProjects: Project[];
+
+  @ManyToMany(() => Project, (project) => project.members)
+  projects: Project[];
+
+  @ManyToMany(() => Task, task => task.assignees)
+  assignedTasks: Task[];
+  
 }

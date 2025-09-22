@@ -27,6 +27,34 @@ export class TasksService {
         return 0;
     }
   }
+  
+  async getTasks(user: User): Promise<Task[]> {
+    return this.tasksRepository.find({ where: { user: { id: user.id } } });
+  }
+
+  async getTaskById(id: string, user: User): Promise<Task> {
+    const task = await this.tasksRepository.findOne({ where: { id, user: { id: user.id } } });
+    if (!task) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
+    return task;
+  }
+
+  async updateTask(id: string, updateTaskDto: any, user: User): Promise<Task> {
+    const task = await this.getTaskById(id, user);
+    
+    const { title, description, difficulty, status } = updateTaskDto;
+    if(title) task.title = title;
+    if(description) task.description = description;
+    if(status) task.status = status;
+    
+    if(difficulty) {
+        task.difficulty = difficulty;
+        task.xpValue = this.getXpForDifficulty(difficulty);
+    }
+    
+    return this.tasksRepository.save(task);
+  }
 
   async createTask(createTaskDto: any, user: User): Promise<Task> {
     const { title, description, difficulty } = createTaskDto;
@@ -42,6 +70,13 @@ export class TasksService {
     });
 
     return this.tasksRepository.save(task);
+  }
+  
+  async deleteTask(id: string, user: User): Promise<void> {
+    const result = await this.tasksRepository.delete({ id, user: { id: user.id } });
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
   }
 
   async completeTask(id: string, user: User): Promise<User> {

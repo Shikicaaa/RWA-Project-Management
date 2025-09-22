@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './users/user.entity';
 import { TasksModule } from './tasks/tasks.module';
 import { Task } from './tasks/task.entity';
+import { ProjectsModule } from './projects/projects.module';
+import { Project } from './projects/project.entity';
 
 @Module({
   imports: [
@@ -17,13 +19,14 @@ import { Task } from './tasks/task.entity';
       username: 'shikicaaa',
       password: 'shikicaaa123',
       database: 'project_management',
-      entities: [User, Task],
+      entities: [User, Task, Project],
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     UsersModule,
     AuthModule,
     TasksModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
