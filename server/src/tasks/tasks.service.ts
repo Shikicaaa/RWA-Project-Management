@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Task, TaskDifficulty, TaskStatus } from './task.entity';
 import { Project } from 'src/projects/project.entity';
 
@@ -84,44 +84,83 @@ export class TasksService {
 
     return this.tasksRepository.save(task);
   }
-  
-  async deleteTask(id: string, user: User): Promise<void> {
-    const result = await this.tasksRepository.delete({ id, user: { id: user.id } });
-    if (result.affected === 0) {
-      throw new NotFoundException(`Task with ID "${id}" not found`);
-    }
-  }
 
-  async completeTask(id: string, user: User): Promise<User> {
-    const task = await this.tasksRepository.findOne({ where: { id }, relations: ['user'] });
-    
+  async deleteTask(id: string, user: User): Promise<void> {
+    const task = await this.tasksRepository.findOne({
+      where: { id },
+      relations: ['project', 'project.members'],
+    });
+
     if (!task) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
 
-    if (task.user.id !== user.id) {
-        throw new UnauthorizedException('You are not authorized to complete this task');
+    const isMember = task.project.members.some(member => member.id === user.id);
+    if (!isMember) {
+      throw new UnauthorizedException('You are not authorized to delete this task');
     }
-    
-    if(task.status === TaskStatus.DONE) {
-        console.log("Task already completed");
-        return user;
+
+    const result = await this.tasksRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" could not be deleted`);
+    }
+  }
+
+  async completeTask(id: string, user: User): Promise<User> {
+    const task = await this.tasksRepository.findOne({ 
+      where: { id }, 
+      relations: ['project', 'project.members'] 
+    });
+
+    if (!task) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
+
+    const isMember = task.project.members.some(member => member.id === user.id);
+    if (!isMember) {
+      throw new UnauthorizedException('You are not a member of this project');
+    }
+
+    if (task.status === TaskStatus.DONE) {
+      console.log('Task already completed');
+      return user;
     }
 
     task.status = TaskStatus.DONE;
     await this.tasksRepository.save(task);
 
-    const owner = await this.usersRepository.findOneBy({ id: user.id });
-    if (!owner) {
-      throw new NotFoundException(`User with ID "${user.id}" not found`);
+    user.xp += task.xpValue;
+    const updatedUser = await this.usersRepository.save(user);
+
+    return this.usersService.checkLevelUp(updatedUser);
+  }
+
+  async assignTaskToMembers(taskId: string, memberIds: string[], currentUser: User): Promise<Task> {
+    const task = await this.tasksRepository.findOne({
+      where: { id: taskId },
+      relations: ['project', 'project.members'],
+    });
+
+    if (!task) {
+      throw new NotFoundException(`Task with ID "${taskId}" not found`);
     }
-    owner.xp += task.xpValue;
+
+    const isCurrentUserMember = task.project.members.some(member => member.id === currentUser.id);
+    if (!isCurrentUserMember) {
+      throw new UnauthorizedException('You are not a member of this project.');
+    }
+
+    const membersToAssign = await this.usersRepository.findBy({ id: In(memberIds) });
+
+    const projectMemberIds = new Set(task.project.members.map(m => m.id));
+    const allAssigneesAreProjectMembers = membersToAssign.every(assignee => projectMemberIds.has(assignee.id));
     
-    await this.usersRepository.save(owner);
+    if (!allAssigneesAreProjectMembers) {
+      throw new UnauthorizedException('One or more users you are trying to assign are not members of the project.');
+    }
 
-    const updatedUserWithLevel = await this.usersService.checkLevelUp(owner);
-
-    return updatedUserWithLevel;
-
+    task.assignees = membersToAssign;
+    return this.tasksRepository.save(task);
   }
 }

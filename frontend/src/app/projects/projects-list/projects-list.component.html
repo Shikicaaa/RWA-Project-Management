@@ -1,0 +1,34 @@
+<div class="p-4 sm:p-6 lg:p-8">
+  <div class="sm:flex sm:items-center">
+  </div>
+
+  <div *ngIf="showCreateForm" class="p-6 mt-8 bg-white ...">
+    </div>
+
+  <div *ngIf="isLoading$ | async" class="mt-8 text-center">
+    <p class="text-text-secondary">Loading projects...</p>
+  </div>
+
+  <div *ngIf="!(isLoading$ | async)">
+    <div *ngIf="(projects$ | async) as projects">
+      
+      <div *ngIf="projects.length > 0; else noProjectsTemplate" class="mt-8">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <a *ngFor="let project of projects" [routerLink]="['/projects', project.id]" 
+             class="block p-6 transition-all duration-300 bg-white border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 hover:border-primary">
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main">{{ project.name }}</h5>
+            <p class="font-normal text-text-secondary">{{ project.description || 'No description available.' }}</p>
+          </a>
+        </div>
+      </div>
+
+      <ng-template #noProjectsTemplate>
+        <div class="py-12 text-center">
+          <h3 class="mt-2 text-sm font-medium text-text-main">No projects</h3>
+          <p class="mt-1 text-sm text-text-secondary">Get started by creating a new project.</p>
+        </div>
+      </ng-template>
+
+    </div>
+  </div>
+</div>

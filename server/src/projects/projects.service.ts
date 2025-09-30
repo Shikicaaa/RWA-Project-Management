@@ -29,6 +29,7 @@ export class ProjectsService {
       .createQueryBuilder('project')
       .leftJoin('project.members', 'member')
       .where('member.id = :userId', { userId: user.id })
+      .orWhere('project.ownerId = :userId', { userId: user.id })
       .getMany();
   }
 
@@ -43,9 +44,12 @@ export class ProjectsService {
     }
 
     const isMember = project.members.some((member) => member.id === user.id);
-    if (!isMember) {
-      throw new UnauthorizedException('You are not a member of this project');
+    const isOwner = project.owner.id === user.id;
+
+    if (!isMember && !isOwner) {
+      throw new UnauthorizedException('You are not authorized to view this project');
     }
+
     return project;
   }
   

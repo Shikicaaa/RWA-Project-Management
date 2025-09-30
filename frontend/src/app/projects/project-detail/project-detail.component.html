@@ -1,0 +1,91 @@
+<div *ngIf="project$ | async as project; else loading" class="p-4 sm:p-6 lg:p-8">
+
+  <div class="pb-5 mb-8 border-b border-gray-200">
+    <h3 class="text-2xl font-bold leading-6 text-text-main">{{ project.name }}</h3>
+    <p class="max-w-4xl mt-2 text-sm text-text-secondary">{{ project.description }}</p>
+    <p class="mt-1 text-xs text-gray-400">Owner: {{ project.owner.email }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+    <div class="lg:col-span-9">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="text-xl font-semibold text-text-main">Tasks</h4>
+        <button (click)="showCreateTaskForm = !showCreateTaskForm" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">{{ showCreateTaskForm ? 'Cancel' : '+ New Task' }}</button>
+      </div>
+
+      <form *ngIf="showCreateTaskForm" [formGroup]="taskForm" (ngSubmit)="onTaskCreateSubmit()" class="p-4 mb-6 space-y-4 shadow-sm bg-background-light rounded-lg">
+        <div>
+            <label for="title" class="sr-only">Title</label>
+            <input id="title" type="text" formControlName="title" placeholder="Task title" class="block w-full px-3 py-2 text-sm border-gray-300 rounded-md focus:border-primary focus:ring-primary">
+        </div>
+        <div>
+            <label for="difficulty" class="sr-only">Difficulty</label>
+            <select id="difficulty" formControlName="difficulty" class="block w-full px-3 py-2 text-sm border-gray-300 rounded-md focus:border-primary focus:ring-primary">
+              <option *ngFor="let difficulty of taskDifficulties" [value]="difficulty">{{ difficulty | titlecase }}</option>
+            </select>
+        </div>
+        <button type="submit" [disabled]="taskForm.invalid" class="px-4 py-2 text-sm font-medium text-white transition-colors border border-transparent rounded-md shadow-sm bg-primary hover:bg-primary-dark disabled:bg-primary-light">Add Task</button>
+      </form>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        
+        <div class="p-4 rounded-lg bg-background-light">
+          <h3 class="font-bold text-text-main">To Do</h3>
+          <div *ngIf="todoTasks$ | async as tasks" class="mt-4 space-y-4">
+            <ng-container *ngIf="tasks.length > 0; else emptyState">
+              <div *ngFor="let task of tasks" class="p-4 bg-white rounded-lg shadow-sm">
+                <p class="font-semibold text-text-main">{{ task.title }}</p>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="px-2 py-1 text-xs font-semibold rounded-full text-accent-dark bg-accent/20">{{ task.difficulty | titlecase }} | {{task.xpValue}} XP</span>
+                  <div class="flex items-center space-x-2">
+                    <button (click)="onCompleteTask(task.id)" class="px-3 py-1 text-xs font-medium text-white transition-colors rounded-md bg-accent hover:bg-accent-dark" title="Complete Task">✓</button>
+                    <button (click)="onDeleteTask(task.id, task.title)" class="text-gray-400 hover:text-secondary" title="Delete Task">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #emptyState><p class="text-xs text-center text-gray-500">No tasks here.</p></ng-template>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-lg bg-background-light">
+          <h3 class="font-bold text-text-main">In Progress</h3>
+          <div *ngIf="inProgressTasks$ | async as tasks" class="mt-4 space-y-4">
+             <ng-template #emptyState><p class="text-xs text-center text-gray-500">No tasks here.</p></ng-template>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-lg bg-background-light">
+          <h3 class="font-bold text-text-main">Done</h3>
+          <div *ngIf="doneTasks$ | async as tasks" class="mt-4 space-y-4">
+            <ng-container *ngIf="tasks.length > 0; else emptyState">
+              <div *ngFor="let task of tasks" class="p-4 bg-white rounded-lg shadow-sm opacity-70">
+                <p class="font-semibold text-gray-800 line-through">{{ task.title }}</p>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">{{ task.difficulty | titlecase }} | {{task.xpValue}} XP</span>
+                  <button (click)="onDeleteTask(task.id, task.title)" class="text-gray-400 hover:text-secondary" title="Delete Task">🗑️</button>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #emptyState><p class="text-xs text-center text-gray-500">No tasks here.</p></ng-template>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="lg:col-span-3">
+      <h4 class="text-lg font-medium text-text-main">Members</h4>
+      <ul *ngIf="project.members.length > 0" class="mt-4 space-y-2">
+        <li *ngFor="let member of project.members" class="flex items-center justify-between p-2 bg-background-light rounded-md">
+          <span class="text-sm font-medium">{{ member.email }}</span>
+          <span *ngIf="member.id === project.owner.id" class="px-2 text-xs rounded-full text-primary-dark bg-primary/20">Owner</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p class="p-4 text-center text-text-secondary">Loading project details...</p>
+</ng-template>

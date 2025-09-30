@@ -1,20 +1,13 @@
 import { Controller, Post, Body, UseGuards, Req, Patch, Param, Get, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from './tasks.service';
-import { ProjectsService } from 'src/projects/projects.service';
 
 @Controller('tasks')
 @UseGuards(AuthGuard('jwt'))
 export class TasksController {
   constructor(
-      private readonly projectsService: ProjectsService,
       private readonly tasksService: TasksService,
   ) {}
-
-  @Post(':id/tasks')
-  createTaskInProject(@Param('id') projectId: string, @Body() createTaskDto: any, @Req() req) {
-    return this.tasksService.createTask(createTaskDto, projectId, req.user);
-  }
 
   @Get()
   getTasks(@Req() req) {
@@ -40,5 +33,14 @@ export class TasksController {
   @Patch(':id/complete')
   completeTask(@Param('id') id: string, @Req() req) {
     return this.tasksService.completeTask(id, req.user);
+  }
+
+  @Patch(':id/assignees')
+  assignTask(
+    @Param('id') taskId: string,
+    @Body('memberIds') memberIds: string[],
+    @Req() req,
+  ) {
+    return this.tasksService.assignTaskToMembers(taskId, memberIds, req.user);
   }
 }

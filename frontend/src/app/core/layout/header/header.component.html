@@ -1,0 +1,23 @@
+<header class="shadow-md bg-background-light border-b-2 border-primary/20">
+  <nav class="container flex items-center justify-between p-4 mx-auto">
+    <a routerLink="/" class="text-xl font-bold text-primary-dark">ProjectManager</a>
+    
+    <div *ngIf="isAuthenticated$ | async" class="flex items-center space-x-4">
+      <div *ngIf="user$ | async as user" class="text-sm text-text-secondary">
+        Welcome, <span class="font-medium text-text-main">{{ user.email }}</span> 
+        (Level: {{ user.level }}, XP: {{ user.xp }})
+      </div>
+      <button 
+        (click)="logout()"
+        class="px-3 py-1 text-sm font-medium text-white rounded-md bg-secondary hover:bg-secondary-dark transition-colors"
+      >
+        Logout
+      </button>
+    </div>
+
+    <div *ngIf="!(isAuthenticated$ | async)" class="flex items-center space-x-4">
+      <a routerLink="/login" class="text-sm font-medium text-text-secondary hover:text-primary">Login</a>
+      <a routerLink="/register" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">Register</a>
+    </div>
+  </nav>
+</header>
