@@ -5,12 +5,12 @@ import { Request, Response, NextFunction } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log('--- NOVI ZAHTEV ---');
-    console.log('Vreme:', new Date().toISOString());
-    console.log('Metoda:', req.method);
-    console.log('URL:', req.originalUrl);
-    console.log('Origin Header:', req.headers.origin);
-    console.log('--------------------');
+    // console.log('--- NOVI ZAHTEV ---');
+    // console.log('Vreme:', new Date().toISOString());
+    // console.log('Metoda:', req.method);
+    // console.log('URL:', req.originalUrl);
+    // console.log('Origin Header:', req.headers.origin);
+    // console.log('--------------------');
     
     next();
   });
