@@ -2,6 +2,8 @@ import { createAction, props } from '@ngrx/store';
 import { CreateTaskDto, UpdateTaskDto } from '../../core/services/projects-api.service';
 import { Task } from '../../models/task.model';
 import { User } from '../../models/user.model';
+import { Comment } from '../../models/comment.model';
+import { Update } from '@ngrx/entity';
 
 export const TasksActions = {
   createTask: createAction(
@@ -39,6 +41,30 @@ export const TasksActions = {
   ),
   deleteTaskFailure: createAction(
     '[Tasks API] Delete Task Failure',
+    props<{ error: any }>()
+  ),
+  updateTask: createAction(
+    '[Project Details] Update Task',
+    props<{ taskId: string, changes: UpdateTaskDto}>()
+  ),
+  updateTaskSuccess: createAction(
+    '[Tasks API] Update Task Success',
+    props<{ task: Update<Task>}>()
+  ),
+  updateTaskFailure: createAction(
+    '[Tasks API] Update Task Failure',
+    props<{ error: any }>()
+  ),
+  createComment: createAction(
+    '[Task Details] Create Comment',
+    props<{ taskId: string; content: string }>()
+  ),
+  createCommentSuccess: createAction(
+    '[Tasks API] Create Comment Success',
+    props<{ comment: Comment }>()
+  ),
+  createCommentFailure: createAction(
+    '[Tasks API] Create Comment Failure',
     props<{ error: any }>()
   ),
 };

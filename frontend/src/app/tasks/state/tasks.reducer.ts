@@ -2,6 +2,7 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { ProjectsActions } from '../../projects/state/projects.actions';
 import { Task, TaskStatus } from '../../models/task.model';
+import { Comment } from '../../models/comment.model';
 import { TasksActions } from './tasks.actions';
 
 export interface TasksState extends EntityState<Task> {
@@ -31,7 +32,6 @@ export const tasksFeature = createFeature({
         ...task,
         project: projectInfo,
       }));
-      console.log('REDUCER: Taskovi koji se dodaju u state:', tasksWithProjectContext);
 
       return tasksAdapter.upsertMany(tasksWithProjectContext, state);
     }),
@@ -59,8 +59,36 @@ export const tasksFeature = createFeature({
     })),
     on(TasksActions.deleteTaskSuccess, (state, { taskId }) => {
         return tasksAdapter.removeOne(taskId, state);
+    }),
+    on(TasksActions.updateTaskSuccess, (state, { task }) => {
+        if (typeof task.id === 'string') {
+        }
+        const newState = tasksAdapter.updateOne(task, state);
+        if (typeof task.id === 'string') {
+        }
+        return newState;
+    }),
+    on(TasksActions.createCommentSuccess, (state, { comment }) => {
+      const taskId = comment.task.id;
+      
+      if (!taskId) {
+        return state;
+      }
+      
+      const task = state.entities[taskId];
+      if (!task) {
+        return state;
+      }
+      
+      const updatedTask = {
+        ...task,
+        comments: [...task.comments, comment],
+      };
+
+      return tasksAdapter.updateOne({ id: taskId, changes: updatedTask }, state);
     })
   ),
+  
 });
 
 export const { selectAll, selectEntities } = tasksAdapter.getSelectors(

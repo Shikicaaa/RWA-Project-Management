@@ -21,6 +21,18 @@ export class ProjectsEffects {
         )
     );
 
+    addMember$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ProjectsActions.addMember),
+            switchMap(({ projectId, email }) =>
+                this.projectsApiService.addMemberToProject(projectId, email).pipe(
+                    map(project => ProjectsActions.addMemberSuccess({ project })),
+                    catchError(error => of(ProjectsActions.addMemberFailure({ error })))
+                )
+            )
+        )
+    );
+
     createProject$ = createEffect(() =>
         this.actions$.pipe(
             ofType(ProjectsActions.createProject),

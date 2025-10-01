@@ -8,12 +8,16 @@ import { User } from 'src/users/user.entity';
 import { UsersModule } from 'src/users/users.module';
 import { Project } from 'src/projects/project.entity';
 import { ProjectsModule } from 'src/projects/projects.module';
+import { Comment } from 'src/comments/comment.entity';
+import { CommentsService } from './comment.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task, User, Project]), AuthModule, UsersModule, forwardRef(() => ProjectsModule)],
+  imports: [TypeOrmModule.forFeature([Task, User, Project, Comment]), AuthModule, UsersModule, forwardRef(() => ProjectsModule)],
   controllers: [TasksController],
-  providers: [TasksService],
+  providers: [TasksService, CommentsService],
   exports: [TasksService]
 })
+
+
 
 export class TasksModule {}

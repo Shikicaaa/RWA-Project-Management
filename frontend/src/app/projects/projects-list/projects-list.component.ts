@@ -6,7 +6,10 @@ import { selectAll, selectIsLoading } from '../state/projects.reducer';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CreateProjectDto } from '../../core/services/projects-api.service';
-import { tap } from 'rxjs/internal/operators/tap';
+import { combineLatest, map, Observable } from 'rxjs';
+import { Project } from '../../models/project.model';
+import { selectUser } from '../../auth/state/auth.reducer';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-projects-list',
@@ -18,7 +21,12 @@ export class ProjectsListComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
 
-  projects$ = this.store.select(selectAll);
+  private allProjects$ = this.store.select(selectAll);
+  
+  currentUser$: Observable<User | null> = this.store.select(selectUser);
+  ownedProjects$!: Observable<Project[]>;
+  participatingProjects$!: Observable<Project[]>;
+
   isLoading$ = this.store.select(selectIsLoading);
   
   showCreateForm = false; 
@@ -31,10 +39,20 @@ export class ProjectsListComponent implements OnInit {
   ngOnInit(): void {
     this.store.dispatch(ProjectsActions.loadProjects());
 
-    this.projects$.pipe(
-      tap(projectsFromState => console.log('PROJEKTI IZ STATE-A U KOMPONENTI:', projectsFromState)));
-    // ).subscribe();
+    const projectsAndUser$ = combineLatest([
+      this.allProjects$,
+      this.currentUser$
+    ]);
+
+    this.ownedProjects$ = projectsAndUser$.pipe(
+      map(([projects, user]) => projects.filter(p => p.owner.id === user?.id))
+    );
+
+    this.participatingProjects$ = projectsAndUser$.pipe(
+      map(([projects, user]) => projects.filter(p => p.owner.id !== user?.id))
+    );
   }
+
   toggleCreateForm(): void {
     this.showCreateForm = !this.showCreateForm;
     this.projectForm.reset();
@@ -52,7 +70,6 @@ export class ProjectsListComponent implements OnInit {
     
     this.store.dispatch(ProjectsActions.createProject({ projectData }));
 
-    // TODO: Sakriti formu nakon uspešnog kreiranja.
     this.showCreateForm = false;
     this.projectForm.reset();
   }

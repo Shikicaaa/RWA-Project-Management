@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../models/project.model';
 import { environment } from '../../../environment/environment';
 import { Task, TaskDifficulty } from '../../models/task.model';
+import { Comment } from '../../models/comment.model';
 
 export interface CreateProjectDto {
   name: string;
@@ -19,12 +20,15 @@ export interface CreateTaskDto {
     title: string;
     description?: string;
     difficulty: TaskDifficulty;
+    comments?: Comment[];
+    status?: Task['status'];
 }
 
 export interface UpdateTaskDto{
     title?: string;
     description?: string;
     difficulty?: TaskDifficulty;
+    comments?: Comment[];
     status?: Task['status'];
 }
 

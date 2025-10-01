@@ -17,6 +17,15 @@
         >
       </div>
       <div>
+        <label for="username" class="block text-sm font-medium text-text-secondary">Username</label>
+        <input 
+          id="username" 
+          type="text" 
+          formControlName="username"
+          class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+        >
+      </div>
+      <div>
         <label for="password" class="block text-sm font-medium text-text-secondary">Password</label>
         <input 
           id="password" 
@@ -39,6 +48,6 @@
     <p class="text-sm text-center text-text-secondary">
       Already have an account? 
       <a routerLink="/login" class="font-medium text-primary hover:text-primary-dark">Login here</a>
-    p>
+    </p>
   </div>
 </div>

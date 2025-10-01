@@ -1,12 +1,15 @@
 import { Controller, Post, Body, UseGuards, Req, Patch, Param, Get, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from './tasks.service';
+import { CommentsService } from './comment.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Controller('tasks')
 @UseGuards(AuthGuard('jwt'))
 export class TasksController {
   constructor(
-      private readonly tasksService: TasksService,
+    private readonly tasksService: TasksService,
+    private readonly commentsService: CommentsService,
   ) {}
 
   @Get()
@@ -42,5 +45,14 @@ export class TasksController {
     @Req() req,
   ) {
     return this.tasksService.assignTaskToMembers(taskId, memberIds, req.user);
+  }
+
+  @Post(':id/comments')
+  createComment(
+    @Param('id') taskId: string,
+    @Body() createCommentDto: CreateCommentDto,
+    @Req() req,
+  ) {
+    return this.commentsService.createComment(taskId, createCommentDto, req.user);
   }
 }

@@ -6,6 +6,7 @@ import { TasksApiService } from '../../core/services/tasks-api.service';
 import { TasksActions } from './tasks.actions';
 import { Task, TaskStatus } from '../../models/task.model';
 import { AuthActions } from '../../auth/state/auth.actions';
+import { ProjectsActions } from '../../projects/state/projects.actions';
 
 @Injectable()
 export class TasksEffects {
@@ -47,6 +48,30 @@ export class TasksEffects {
         this.tasksApiService.deleteTask(taskId).pipe(
           map(() => TasksActions.deleteTaskSuccess({ taskId })),
           catchError((error) => of(TasksActions.deleteTaskFailure({ error })))
+        )
+      )
+    )
+  );
+  updateTask$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(TasksActions.updateTask),
+      switchMap(({ taskId, changes }) =>
+        this.tasksApiService.updateTask(taskId, changes).pipe(
+          map((updatedTask) => TasksActions.updateTaskSuccess({ 
+            task: { id: updatedTask.id, changes: updatedTask } 
+          })),
+          catchError((error) => of(TasksActions.updateTaskFailure({ error })))
+        )
+      )
+    )
+  );
+  createComment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(TasksActions.createComment),
+      switchMap(({ taskId, content }) =>
+        this.tasksApiService.createComment(taskId, content).pipe(
+          map(comment => TasksActions.createCommentSuccess({ comment })),
+          catchError(error => of(TasksActions.createCommentFailure({ error })))
         )
       )
     )

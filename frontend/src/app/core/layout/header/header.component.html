@@ -4,8 +4,10 @@
     
     <div *ngIf="isAuthenticated$ | async" class="flex items-center space-x-4">
       <div *ngIf="user$ | async as user" class="text-sm text-text-secondary">
-        Welcome, <span class="font-medium text-text-main">{{ user.email }}</span> 
-        (Level: {{ user.level }}, XP: {{ user.xp }})
+        <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" class="font-medium hover:text-primary mr-5">All Projects</a>
+        <a *ngIf="user.role === 'admin'" routerLink="/admin" class="font-medium hover:text-primary mr-5">Admin Panel</a>
+        <span>Welcome, <span class="font-medium text-text-main">{{ user.username }}</span> 
+        (Level: {{ user.level }}, XP: {{ user.xp }})</span>
       </div>
       <button 
         (click)="logout()"

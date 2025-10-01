@@ -2,10 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task, TaskDifficulty, TaskStatus } from '../../models/task.model';
+import { Comment } from '../../models/comment.model';
 import { environment } from '../../../environment/environment';
 import { User } from '../../models/user.model';
 
-// DTO za ažuriranje taska
 export interface UpdateTaskDto {
     title?: string;
     description?: string;
@@ -42,4 +42,9 @@ export class TasksApiService {
   assignTaskToMembers(taskId: string, memberIds: string[]): Observable<Task> {
     return this.http.patch<Task>(`${this.apiUrl}/${taskId}/assignees`, { memberIds });
   }
+
+  createComment(taskId: string, content: string): Observable<Comment> {
+    return this.http.post<Comment>(`${this.apiUrl}/${taskId}/comments`, { content });
+  }
+
 }

@@ -9,6 +9,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { Task } from './tasks/task.entity';
 import { ProjectsModule } from './projects/projects.module';
 import { Project } from './projects/project.entity';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { Project } from './projects/project.entity';
     AuthModule,
     TasksModule,
     ProjectsModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService],

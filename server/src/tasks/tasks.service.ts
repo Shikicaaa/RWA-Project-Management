@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/user.entity';
+import { User, UserRole } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository, In } from 'typeorm';
 import { Task, TaskDifficulty, TaskStatus } from './task.entity';
@@ -36,38 +36,61 @@ export class TasksService {
   }
 
   async getTaskById(id: string, user: User): Promise<Task> {
-    const task = await this.tasksRepository.findOne({ where: { id, user: { id: user.id } } });
+    const task = await this.tasksRepository.findOne({ 
+      where: { id },
+      relations: ['project', 'project.members', 'comments', 'comments.author'] 
+    });
+
     if (!task) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
+
+    const isMember = task.project.members.some(member => member.id === user.id);
+    if (!isMember) {
+        throw new UnauthorizedException('You are not a member of this project');
+    }
+
     return task;
   }
 
   async updateTask(id: string, updateTaskDto: any, user: User): Promise<Task> {
-    const task = await this.getTaskById(id, user);
+    const task = await this.tasksRepository.findOneBy({ id });
+    if (!task) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
     
+    await this.getTaskById(id, user);
+
     const { title, description, difficulty, status } = updateTaskDto;
-    if(title) task.title = title;
-    if(description) task.description = description;
-    if(status) task.status = status;
+    if(title !== undefined) task.title = title;
+    if(description !== undefined) task.description = description;
+    if(status !== undefined) task.status = status;
     
-    if(difficulty) {
+    if(difficulty !== undefined) {
         task.difficulty = difficulty;
         task.xpValue = this.getXpForDifficulty(difficulty);
     }
     
-    return this.tasksRepository.save(task);
+    await this.tasksRepository.save(task);
+
+    return this.getTaskById(id, user);
   }
 
   async createTask(createTaskDto: any, projectId: string, user: User): Promise<Task> {
-    const project = await this.projectsRepository.findOne({ where: { id: projectId }, relations: ['members'] });
+    const project = await this.projectsRepository.findOne({ 
+      where: { id: projectId }, 
+      relations: ['owner', 'members']
+    });
     if (!project) {
         throw new NotFoundException('Project not found');
     }
 
-    const isMember = project.members.some(member => member.id === user.id);
-    if (!isMember) {
-        throw new UnauthorizedException('You are not a member of this project');
+    const isOwner = project.owner.id === user.id;
+    const isManager = user.role === UserRole.PROJECT_MANAGER;
+    const isAdmin = user.role === UserRole.ADMIN;
+
+    if (!isOwner && !isManager && !isAdmin) {
+        throw new UnauthorizedException('You do not have permission to create tasks in this project.');
     }
 
     const { title, description, difficulty } = createTaskDto;
@@ -88,15 +111,18 @@ export class TasksService {
   async deleteTask(id: string, user: User): Promise<void> {
     const task = await this.tasksRepository.findOne({
       where: { id },
-      relations: ['project', 'project.members'],
+      relations: ['project', 'project.owner', 'project.members'],
     });
 
     if (!task) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
 
-    const isMember = task.project.members.some(member => member.id === user.id);
-    if (!isMember) {
+    const isOwner = task.project.owner.id === user.id;
+    const isManager = user.role === UserRole.PROJECT_MANAGER;
+    const isAdmin = user.role === UserRole.ADMIN;
+    
+    if (!isOwner && !isManager && !isAdmin) {
       throw new UnauthorizedException('You are not authorized to delete this task');
     }
 

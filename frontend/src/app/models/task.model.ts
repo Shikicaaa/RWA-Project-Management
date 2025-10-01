@@ -1,5 +1,6 @@
 import { User } from "./user.model";
 import { Project } from "./project.model";
+import { Comment } from "./comment.model";
 
 export enum TaskDifficulty {
   EASY = 'easy',
@@ -20,6 +21,8 @@ export interface Task {
   status: TaskStatus;
   difficulty: TaskDifficulty;
   xpValue: number;
+  drawboardState?: string | null;
   project: Project;
   assignees: User[];
+  comments: Comment[];
 }

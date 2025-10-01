@@ -1,5 +1,3 @@
-// src/main.ts (u NestJS projektu)
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Request, Response, NextFunction } from 'express';

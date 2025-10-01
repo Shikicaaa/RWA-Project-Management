@@ -13,6 +13,19 @@ export const ProjectsActions = {
     props<{ error: any }>()
   ),
 
+  addMember: createAction(
+    '[Project Details] Add Member',
+    props<{ projectId: string; email: string }>()
+  ),
+  addMemberSuccess: createAction(
+    '[Projects API] Add Member Success',
+    props<{ project: Project }>()
+  ),
+  addMemberFailure: createAction(
+    '[Projects API] Add Member Failure',
+    props<{ error: any }>()
+  ),
+
   createProject: createAction(
     '[Projects Page] Create Project',
     props<{ projectData: CreateProjectDto }>()

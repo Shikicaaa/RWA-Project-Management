@@ -13,6 +13,8 @@ import { projectsFeature } from './projects/state/projects.reducer';
 import { ProjectsEffects } from './projects/state/projects.effects';
 import { tasksFeature } from './tasks/state/tasks.reducer';
 import { TasksEffects } from './tasks/state/tasks.effects';
+import { adminFeature } from './admin/state/admin.reducer';
+import { AdminEffects } from './admin/state/admin.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,10 +25,12 @@ export const appConfig: ApplicationConfig = {
     provideState(authFeature),
     provideState(projectsFeature),
     provideState(tasksFeature),
+    provideState(adminFeature),
     provideEffects([
         AuthEffects,
         ProjectsEffects,
-        TasksEffects
+        TasksEffects,
+        AdminEffects
     ]), 
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
   ]

@@ -2,6 +2,7 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { Project } from '../../models/project.model';
 import { ProjectsActions } from './projects.actions';
+import { AdminActions } from '../../admin/state/admin.actions';
 
 export interface ProjectsState extends EntityState<Project> {
   isLoading: boolean;
@@ -44,6 +45,12 @@ export const projectsFeature = createFeature({
     })),
     on(ProjectsActions.loadProjectSuccess, (state, { project }) => {
       return projectsAdapter.upsertOne(project, { ...state, isLoading: false });
+    }),
+    on(ProjectsActions.addMemberSuccess, (state, { project }) => {
+      return projectsAdapter.upsertOne(project, state);
+    }),
+    on(AdminActions.loadAllProjectsSuccess, (state, { projects }) => {
+      return projectsAdapter.setAll(projects, state);
     })
   ),
 });

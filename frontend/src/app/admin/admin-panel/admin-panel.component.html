@@ -1,0 +1,55 @@
+<div class="container p-8 mx-auto">
+  <h1 class="mb-6 text-3xl font-bold text-text-main">Admin Panel - User Management</h1>
+
+  <div *ngIf="users$ | async as users; else loading">
+    <div *ngIf="currentUser$ | async as currentUser">
+      <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full text-sm divide-y-2 divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">Email</th>
+              <th class="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">Level</th>
+              <th class="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">Role</th>
+              <th class="px-4 py-2 font-medium text-left text-gray-900 whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let user of users" class="hover:bg-gray-50">
+              <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">{{ user.email }}</td>
+              <td class="px-4 py-2 text-gray-700 whitespace-nowrap">{{ user.level }}</td>
+              <td class="px-4 py-2 text-gray-700 whitespace-nowrap">
+                <select 
+                  (change)="onRoleChange($event, user)"
+                  [disabled]="user.id === currentUser?.id"
+                  class="w-full p-1 border-gray-300 rounded-md text-text-main focus:ring-primary focus:border-primary disabled:bg-gray-200 disabled:cursor-not-allowed"
+                >
+                  <option 
+                    *ngFor="let role of userRoles" 
+                    [value]="role" 
+                    [selected]="role === user.role"
+                  >
+                    {{ role }}
+                  </option>
+                </select>
+              </td>
+              <td class="px-4 py-2 whitespace-nowrap">
+                <button 
+                  *ngIf="user.id !== currentUser?.id" 
+                  (click)="onDeleteUser(user.id)" 
+                  class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-secondary hover:bg-secondary-dark"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loading>
+    <p class="text-text-secondary">Loading users...</p>
+  </ng-template>
+</div>

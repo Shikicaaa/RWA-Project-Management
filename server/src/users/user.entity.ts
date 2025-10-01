@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Task } from 'src/tasks/task.entity';
+import { Comment } from 'src/comments/comment.entity';
 import { OneToMany } from 'typeorm';
 import { Project } from 'src/projects/project.entity';
 
@@ -17,6 +18,9 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Column({ unique: true })
+  username: string;
+
   @Column()
   password_hash: string;
 
@@ -33,7 +37,7 @@ export class User {
   })
   role: UserRole;
 
-  @OneToMany(() => Task, (task) => task.user, { eager: true })
+  @OneToMany(() => Task, (task) => task.user)
   tasks: Task[];
 
   @OneToMany(() => Project, project => project.owner)
@@ -44,5 +48,8 @@ export class User {
 
   @ManyToMany(() => Task, task => task.assignees)
   assignedTasks: Task[];
+
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
   
 }

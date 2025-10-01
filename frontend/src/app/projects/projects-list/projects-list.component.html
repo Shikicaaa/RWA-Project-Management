@@ -1,34 +1,67 @@
 <div class="p-4 sm:p-6 lg:p-8">
-  <div class="sm:flex sm:items-center">
+  <div class="flex items-center justify-between pb-5 border-b border-gray-200">
+    <h1 class="text-2xl font-bold text-text-main">Projects</h1>
+    <button (click)="toggleCreateForm()" class="px-4 py-2 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">
+      {{ showCreateForm ? 'Cancel' : '+ Create New Project' }}
+    </button>
   </div>
 
-  <div *ngIf="showCreateForm" class="p-6 mt-8 bg-white ...">
-    </div>
+  <div *ngIf="showCreateForm" class="p-6 mt-8 rounded-lg shadow-md bg-background-light">
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label for="name" class="block text-sm font-medium text-text-secondary">Project Name</label>
+        <input id="name" type="text" formControlName="name" class="block w-full px-3 py-2 mt-1 border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+      </div>
+      <div>
+        <label for="description" class="block text-sm font-medium text-text-secondary">Description</label>
+        <textarea id="description" formControlName="description" rows="3" class="block w-full px-3 py-2 mt-1 border-gray-300 rounded-md focus:ring-primary focus:border-primary"></textarea>
+      </div>
+      <button type="submit" [disabled]="projectForm.invalid" class="px-4 py-2 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark disabled:bg-primary-light">
+        Save Project
+      </button>
+    </form>
+  </div>
 
   <div *ngIf="isLoading$ | async" class="mt-8 text-center">
     <p class="text-text-secondary">Loading projects...</p>
   </div>
 
   <div *ngIf="!(isLoading$ | async)">
-    <div *ngIf="(projects$ | async) as projects">
-      
-      <div *ngIf="projects.length > 0; else noProjectsTemplate" class="mt-8">
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-10">
+      <h2 class="text-xl font-semibold text-text-main">My Projects</h2>
+      <div *ngIf="(ownedProjects$ | async) as projects; else noOwnedProjects">
+        <div *ngIf="projects.length > 0; else noOwnedProjects" class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2 lg:grid-cols-3">
           <a *ngFor="let project of projects" [routerLink]="['/projects', project.id]" 
-             class="block p-6 transition-all duration-300 bg-white border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 hover:border-primary">
+             class="block p-6 transition-all duration-300 bg-white border-2 rounded-lg shadow-md hover:shadow-primary/40 hover:border-primary">
             <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main">{{ project.name }}</h5>
             <p class="font-normal text-text-secondary">{{ project.description || 'No description available.' }}</p>
           </a>
         </div>
       </div>
-
-      <ng-template #noProjectsTemplate>
-        <div class="py-12 text-center">
-          <h3 class="mt-2 text-sm font-medium text-text-main">No projects</h3>
-          <p class="mt-1 text-sm text-text-secondary">Get started by creating a new project.</p>
+      <ng-template #noOwnedProjects>
+        <div class="p-6 mt-4 text-center border-2 border-dashed rounded-lg border-gray-300">
+          <p class="text-sm text-text-secondary">You haven't created any projects yet.</p>
         </div>
       </ng-template>
+    </div>
 
+    <div class="mt-10">
+      <h2 class="text-xl font-semibold text-text-main">Projects I'm a member of</h2>
+      <div *ngIf="(participatingProjects$ | async) as projects; else noParticipatingProjects">
+        <div *ngIf="projects.length > 0; else noParticipatingProjects" class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2 lg:grid-cols-3">
+          <a *ngFor="let project of projects" [routerLink]="['/projects', project.id]" 
+             class="block p-6 transition-all duration-300 bg-white border-2 border-transparent rounded-lg shadow-md hover:shadow-indigo-500/40 hover:border-indigo-500">
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main">{{ project.name }}</h5>
+            <p class="font-normal text-text-secondary">{{ project.description || 'No description available.' }}</p>
+            <span class="mt-2 text-xs text-indigo-700">Owner: {{ project.owner.email }}</span>
+          </a>
+        </div>
+      </div>
+       <ng-template #noParticipatingProjects>
+        <div class="p-6 mt-4 text-center border-2 border-dashed rounded-lg border-gray-300">
+          <p class="text-sm text-text-secondary">You are not a member of any other projects.</p>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>

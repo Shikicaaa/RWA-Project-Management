@@ -1,6 +1,7 @@
 import { Project } from 'src/projects/project.entity';
 import { User } from 'src/users/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinTable, ManyToMany } from 'typeorm';
+import { Comment } from 'src/comments/comment.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 
 export enum TaskDifficulty {
   EASY = 'easy',
@@ -50,4 +51,7 @@ export class Task {
   @ManyToMany(() => User, user => user.assignedTasks)
   @JoinTable()
   assignees: User[];
+
+  @OneToMany(() => Comment, (comment) => comment.task, { eager: true, cascade: true })
+  comments: Comment[];
 }
