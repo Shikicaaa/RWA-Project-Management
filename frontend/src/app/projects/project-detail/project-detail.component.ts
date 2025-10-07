@@ -15,12 +15,13 @@ import { CreateTaskDto, UpdateTaskDto } from '../../core/services/projects-api.s
 import { selectUser } from '../../auth/state/auth.reducer';
 import { Actions, ofType } from '@ngrx/effects';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { TaskDetailModalComponent } from '../../features/task-detail-modal.component/task-detail-modal.component';
 
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, TitleCasePipe, DragDropModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TitleCasePipe, DragDropModule, TaskDetailModalComponent ],
   templateUrl: './project-detail.component.html',
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
@@ -41,7 +42,19 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   addMemberErrorMessage: string | null = null;
   private destroy$ = new Subject<void>();
 
+
   constructor() {}
+
+  selectedTaskForDetails: Task | null = null;
+  
+  openTaskDetails(task: Task): void {
+    this.selectedTaskForDetails = task;
+  }
+
+  closeTaskDetails(): void {
+    this.selectedTaskForDetails = null;
+
+}
 
   taskForm = this.fb.group({
     title: ['', Validators.required],

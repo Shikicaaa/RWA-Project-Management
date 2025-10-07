@@ -1,37 +1,37 @@
-<div class="flex items-center justify-center min-h-screen bg-background-light">
-  <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl">
-    <h2 class="text-2xl font-bold text-center text-text-main">Create an Account</h2>
+<div class="flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-primary-dark rounded-lg shadow-xl">
+    <h2 class="text-2xl font-bold text-center text-text-main dark:text-gray-100">Create an Account</h2>
 
-    <div *ngIf="error$ | async as error" class="p-3 text-sm rounded-lg text-secondary-dark bg-secondary/20">
-      Registration failed. This email might already be taken.
+    <div *ngIf="error$ | async as error" class="p-3 text-sm rounded-lg text-red-800 dark:text-red-300 bg-red-100 dark:bg-red-900/50">
+      Registration failed. This email or username might already be taken.
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
       <div>
-        <label for="email" class="block text-sm font-medium text-text-secondary">Email</label>
+        <label for="email" class="block text-sm font-medium text-text-secondary dark:text-gray-300">Email</label>
         <input 
           id="email" 
           type="email" 
           formControlName="email"
-          class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+          class="block w-full px-3 py-2 mt-1 bg-white dark:bg-primary-light/10 border-gray-300 dark:border-primary-light/20 rounded-md shadow-sm text-text-main dark:text-gray-200 focus:ring-primary focus:border-primary sm:text-sm"
         >
       </div>
       <div>
-        <label for="username" class="block text-sm font-medium text-text-secondary">Username</label>
+        <label for="username" class="block text-sm font-medium text-text-secondary dark:text-gray-300">Username</label>
         <input 
           id="username" 
           type="text" 
           formControlName="username"
-          class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+          class="block w-full px-3 py-2 mt-1 bg-white dark:bg-primary-light/10 border-gray-300 dark:border-primary-light/20 rounded-md shadow-sm text-text-main dark:text-gray-200 focus:ring-primary focus:border-primary sm:text-sm"
         >
       </div>
       <div>
-        <label for="password" class="block text-sm font-medium text-text-secondary">Password</label>
+        <label for="password" class="block text-sm font-medium text-text-secondary dark:text-gray-300">Password</label>
         <input 
           id="password" 
           type="password" 
           formControlName="password"
-          class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+          class="block w-full px-3 py-2 mt-1 bg-white dark:bg-primary-light/10 border-gray-300 dark:border-primary-light/20 rounded-md shadow-sm text-text-main dark:text-gray-200 focus:ring-primary focus:border-primary sm:text-sm"
         >
       </div>
       <div>
@@ -45,9 +45,9 @@
         </button>
       </div>
     </form>
-    <p class="text-sm text-center text-text-secondary">
+    <p class="text-sm text-center text-text-secondary dark:text-gray-400">
       Already have an account? 
-      <a routerLink="/login" class="font-medium text-primary hover:text-primary-dark">Login here</a>
+      <a routerLink="/login" class="font-medium text-primary dark:text-accent-light hover:text-primary-dark dark:hover:text-accent">Login here</a>
     </p>
   </div>
 </div>

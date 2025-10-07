@@ -102,6 +102,7 @@ export class TasksService {
       difficulty,
       xpValue,
       project,
+      creator: user,
       assignees: [],
     });
 

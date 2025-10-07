@@ -41,6 +41,7 @@ export class ProjectsService {
         'owner', 
         'members', 
         'tasks', 
+        'tasks.creator',
         'tasks.comments', 
         'tasks.comments.author'
       ],

@@ -1,10 +1,10 @@
 <div class="p-4 sm:p-6 lg:p-8">
-  <div class="pb-5 mb-8 border-b border-gray-200">
-    <h1 class="text-2xl font-bold text-text-main">All Projects (Admin/Manager View)</h1>
+  <div class="pb-5 mb-8 border-b border-gray-200 dark:border-primary-light/10">
+    <h1 class="text-2xl font-bold text-text-main dark:text-gray-100">All Projects (Admin/Manager View)</h1>
   </div>
 
   <div *ngIf="isLoading$ | async" class="mt-8 text-center">
-    <p class="text-text-secondary">Loading projects...</p>
+    <p class="text-text-secondary dark:text-gray-400">Loading projects...</p>
   </div>
 
   <div *ngIf="!(isLoading$ | async)">
@@ -12,18 +12,18 @@
       <div *ngIf="projects.length > 0; else noProjects" class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2 lg:grid-cols-3">
         
         <a *ngFor="let project of projects" [routerLink]="['/projects', project.id]" 
-           class="block p-6 transition-all duration-300 bg-white border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 hover:border-primary">
-          <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main">{{ project.name }}</h5>
-          <p class="font-normal text-text-secondary">{{ project.description || 'No description available.' }}</p>
-          <span class="block mt-4 text-xs font-medium text-primary-dark">Owner: {{ project.owner.email }}</span>
+           class="block p-6 transition-all duration-300 bg-white dark:bg-primary-dark border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 dark:hover:shadow-accent/40 hover:border-accent">
+          <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main dark:text-gray-200">{{ project.name }}</h5>
+          <p class="font-normal text-text-secondary dark:text-gray-400">{{ project.description || 'No description available.' }}</p>
+          <span class="block mt-4 text-xs font-medium text-primary-dark dark:text-accent-light">Owner: {{ project.owner.email }}</span>
         </a>
 
       </div>
     </div>
     <ng-template #noProjects>
       <div class="py-12 text-center">
-        <h3 class="mt-2 text-sm font-medium text-text-main">No projects found</h3>
-        <p class="mt-1 text-sm text-text-secondary">There are no projects in the system yet.</p>
+        <h3 class="mt-2 text-sm font-medium text-text-main dark:text-gray-200">No projects found</h3>
+        <p class="mt-1 text-sm text-text-secondary dark:text-gray-400">There are no projects in the system yet.</p>
       </div>
     </ng-template>
   </div>

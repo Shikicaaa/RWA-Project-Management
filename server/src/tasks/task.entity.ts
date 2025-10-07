@@ -42,6 +42,9 @@ export class Task {
   @Column()
   xpValue: number;
 
+  @ManyToOne(() => User)
+  creator: User;
+
   @ManyToOne(() => User, (user) => user.tasks, { eager: false })
   user: User;
 

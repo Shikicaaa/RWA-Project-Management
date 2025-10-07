@@ -1,24 +1,36 @@
-<header class="shadow-md bg-background-light border-b-2 border-primary/20">
+<header class="shadow-md bg-background-light dark:bg-primary-dark dark:border-b dark:border-primary-light/10">
   <nav class="container flex items-center justify-between p-4 mx-auto">
-    <a routerLink="/" class="text-xl font-bold text-primary-dark">ProjectManager</a>
+    <a routerLink="/" class="text-xl font-bold text-primary-dark dark:text-accent-light">ProjectManager</a>
     
     <div *ngIf="isAuthenticated$ | async" class="flex items-center space-x-4">
-      <div *ngIf="user$ | async as user" class="text-sm text-text-secondary">
-        <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" class="font-medium hover:text-primary mr-5">All Projects</a>
-        <a *ngIf="user.role === 'admin'" routerLink="/admin" class="font-medium hover:text-primary mr-5">Admin Panel</a>
-        <span>Welcome, <span class="font-medium text-text-main">{{ user.username }}</span> 
-        (Level: {{ user.level }}, XP: {{ user.xp }})</span>
+      <div *ngIf="user$ | async as user" class="flex items-center space-x-4 text-sm text-text-secondary dark:text-gray-300">
+        
+        <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" class="font-medium hover:text-primary dark:hover:text-accent-light">All Projects</a>
+        <a *ngIf="user.role === 'admin'" routerLink="/admin" class="font-medium hover:text-primary dark:hover:text-accent-light">Admin Panel</a>
+        
+        <div *ngIf="levelProgress$ | async as progress" class="flex items-center space-x-2 w-48">
+          <span class="font-bold text-primary dark:text-accent-light">Lvl {{ progress.level }}</span>
+          <div class="w-full bg-primary-light/50 dark:bg-gray-700 rounded-full h-2.5">
+            <div class="bg-primary dark:bg-accent h-2.5 rounded-full" [style.width]="progress.percentage + '%'"></div>
+          </div>
+        </div>
+        <div *ngIf="levelProgress$ | async as progress" class="text-xs text-gray-500 dark:text-gray-400">
+           ({{ progress.xp }} / {{ progress.requiredXp }} XP)
+        </div>
+
+        <span class="hidden md:inline">Welcome, <span class="font-medium text-text-main dark:text-white">{{ user.username }}</span></span>
       </div>
+      <app-theme-toggle></app-theme-toggle>
       <button 
         (click)="logout()"
-        class="px-3 py-1 text-sm font-medium text-white rounded-md bg-secondary hover:bg-secondary-dark transition-colors"
+        class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-red-600 hover:bg-red-700"
       >
         Logout
       </button>
     </div>
 
     <div *ngIf="!(isAuthenticated$ | async)" class="flex items-center space-x-4">
-      <a routerLink="/login" class="text-sm font-medium text-text-secondary hover:text-primary">Login</a>
+      <a routerLink="/login" class="text-sm font-medium text-text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-accent-light">Login</a>
       <a routerLink="/register" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">Register</a>
     </div>
   </nav>

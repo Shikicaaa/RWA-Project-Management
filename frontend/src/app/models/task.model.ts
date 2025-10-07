@@ -23,6 +23,7 @@ export interface Task {
   xpValue: number;
   drawboardState?: string | null;
   project: Project;
+  creator: User;
   assignees: User[];
   comments: Comment[];
 }

@@ -1,0 +1,19 @@
+<div class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50" (click)="close.emit()">
+  <div class="w-full max-w-lg p-6 bg-white dark:bg-primary-dark rounded-lg shadow-xl" (click)="$event.stopPropagation()">
+    <h3 class="text-2xl font-bold text-text-main dark:text-gray-100">{{ task.title }}</h3>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Created by: <span class="font-medium">{{ task.creator?.username || 'N/A' }}</span>
+    </p>
+
+    <div class="flex items-center mt-4 space-x-4">
+      <span class="px-3 py-1 text-sm font-semibold rounded-full text-accent-dark dark:text-yellow-200 bg-accent/20 dark:bg-yellow-900/50">{{ task.difficulty | titlecase }}</span>
+      <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ task.xpValue }} XP</span>
+    </div>
+
+    <p class="mt-4 text-text-secondary dark:text-gray-300">{{ task.description || 'No description provided.' }}</p>
+
+    <div class="mt-6 text-right">
+      <button (click)="close.emit()" class="px-4 py-2 text-sm font-medium text-white rounded-md bg-primary hover:bg-primary-dark">Close</button>
+    </div>
+  </div>
+</div>
