@@ -47,6 +47,15 @@ export class TasksController {
     return this.tasksService.assignTaskToMembers(taskId, memberIds, req.user);
   }
 
+  @Patch(':id/dependencies')
+  setDependencies(
+    @Param('id') taskId: string,
+    @Body('dependencyIds') dependencyIds: string[],
+    @Req() req,
+  ) {
+    return this.tasksService.setDependencies(taskId, dependencyIds, req.user);
+  }
+
   @Post(':id/comments')
   createComment(
     @Param('id') taskId: string,

@@ -2,7 +2,7 @@
   <div class="w-full max-w-lg p-6 bg-white dark:bg-primary-dark rounded-lg shadow-xl" (click)="$event.stopPropagation()">
     <h3 class="text-2xl font-bold text-text-main dark:text-gray-100">{{ task.title }}</h3>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-      Created by: <span class="font-medium">{{ task.creator?.username || 'N/A' }}</span>
+      Created by: <span class="font-medium">{{ task.creator.username || 'N/A' }}</span>
     </p>
 
     <div class="flex items-center mt-4 space-x-4">
@@ -12,8 +12,22 @@
 
     <p class="mt-4 text-text-secondary dark:text-gray-300">{{ task.description || 'No description provided.' }}</p>
 
-    <div class="mt-6 text-right">
-      <button (click)="close.emit()" class="px-4 py-2 text-sm font-medium text-white rounded-md bg-primary hover:bg-primary-dark">Close</button>
+    <div class="mt-4">
+        <label for="dependencies" class="block text-sm font-medium text-text-secondary dark:text-gray-300">Depends on</label>
+        <select 
+            id="dependencies"
+            multiple
+            [formControl]="dependenciesControl"
+            class="block w-full h-32 px-3 py-2 mt-1 bg-white dark:bg-primary-light/10 border-gray-300 dark:border-primary-light/20 rounded-md shadow-sm text-text-main dark:text-gray-200 focus:ring-primary focus:border-primary"
+        >
+            <option *ngFor="let dep of potentialDependencies" [value]="dep.id">{{ dep.title }}</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500">Hold Ctrl (or Cmd on Mac) to select multiple tasks.</p>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-4">
+      <button (click)="close.emit()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Cancel</button>
+      <button (click)="onSave()" class="px-4 py-2 text-sm font-medium text-white rounded-md bg-primary hover:bg-primary-dark">Save & Close</button>
     </div>
   </div>
 </div>

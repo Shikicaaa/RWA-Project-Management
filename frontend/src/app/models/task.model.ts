@@ -26,4 +26,5 @@ export interface Task {
   creator: User;
   assignees: User[];
   comments: Comment[];
+  dependencies: Partial<Task>[];
 }

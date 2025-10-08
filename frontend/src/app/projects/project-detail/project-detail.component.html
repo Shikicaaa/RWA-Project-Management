@@ -28,6 +28,18 @@
               <option *ngFor="let difficulty of taskDifficulties" [value]="difficulty">{{ difficulty | titlecase }}</option>
             </select>
         </div>
+        <div>
+          <label for="dependencies-create" class="block text-sm font-medium text-text-secondary dark:text-gray-300">Depends on</label>
+          <select 
+              id="dependencies-create"
+              multiple
+              formControlName="dependencyIds"
+              class="block w-full h-24 px-3 py-2 mt-1 bg-white dark:bg-primary-light/10 border-gray-300 dark:border-primary-light/20 rounded-md shadow-sm text-text-main dark:text-gray-200 focus:ring-primary focus:border-primary"
+          >
+              <option *ngFor="let task of (allTasksInProject$ | async)" [value]="task.id">{{ task.title }}</option>
+          </select>
+          <p class="mt-1 text-xs text-gray-500">Hold Ctrl (or Cmd on Mac) to select multiple tasks.</p>
+        </div>
         <button type="submit" [disabled]="taskForm.invalid" class="px-4 py-2 text-sm font-medium text-white transition-colors border border-transparent rounded-md shadow-sm bg-primary hover:bg-primary-dark disabled:bg-primary-light">Add Task</button>
       </form>
 
@@ -45,11 +57,14 @@
           <div class="mt-4 space-y-4 min-h-[100px]">
             <ng-container *ngIf="(todoTasks$ | async) as tasks">
               <div *ngFor="let task of tasks; trackBy: trackByTaskId" cdkDrag [cdkDragData]="task" class="p-4 bg-white dark:bg-primary-dark rounded-lg shadow-sm cursor-pointer hover:ring-2 hover:ring-accent" (click)="openTaskDetails(task)">
-                <p class="font-semibold text-text-main dark:text-gray-200">{{ task.title }}</p>
+                <div class="flex items-center space-x-2">
+                  <p class="font-semibold text-text-main dark:text-gray-200">{{ task.title }}</p>
+                  <span *ngIf="hasUnmetDependencies(task)" title="This task is blocked by other tasks">🔒</span>
+                </div>
                 <div class="flex items-center justify-between mt-2">
                   <span class="px-2 py-1 text-xs font-semibold rounded-full text-accent-dark dark:text-yellow-200 bg-accent/20 dark:bg-yellow-900/50">{{ task.difficulty | titlecase }} | {{task.xpValue}} XP</span>
                   <div class="flex items-center space-x-2">
-                    <button (click)="onCompleteTask(task.id); $event.stopPropagation()" class="px-3 py-1 text-xs font-medium text-white transition-colors rounded-md bg-accent hover:bg-accent-dark" title="Complete Task">✓</button>
+                    <!-- <button (click)="onCompleteTask(task.id); $event.stopPropagation()" class="px-3 py-1 text-xs font-medium text-white transition-colors rounded-md bg-accent hover:bg-accent-dark" title="Complete Task">✓</button> -->
                     <button (click)="onDeleteTask(task.id, task.title); $event.stopPropagation()" class="text-gray-400 hover:text-red-500" title="Delete Task">🗑️</button>
                   </div>
                 </div>
@@ -86,7 +101,10 @@
           <div class="mt-4 space-y-4 min-h-[100px]">
             <ng-container *ngIf="(inProgressTasks$ | async) as tasks">
               <div *ngFor="let task of tasks; trackBy: trackByTaskId" cdkDrag [cdkDragData]="task" (click)="openTaskDetails(task)" class="p-4 bg-white dark:bg-primary-dark rounded-lg shadow-sm cursor-pointer hover:ring-2 hover:ring-accent">
-                <p class="font-semibold text-text-main dark:text-gray-200">{{ task.title }}</p>
+                <div class="flex items-center space-x-2">
+                  <p class="font-semibold text-text-main dark:text-gray-200">{{ task.title }}</p>
+                  <span *ngIf="hasUnmetDependencies(task)" title="This task is blocked by other tasks">🔒</span>
+                </div>
                 <div class="flex items-center justify-between mt-2">
                   <span class="px-2 py-1 text-xs font-semibold rounded-full text-accent-dark dark:text-yellow-200 bg-accent/20 dark:bg-yellow-900/50">{{ task.difficulty | titlecase }} | {{task.xpValue}} XP</span>
                   <div class="flex items-center space-x-2">
@@ -186,5 +204,7 @@
 <app-task-detail-modal 
   *ngIf="selectedTaskForDetails" 
   [task]="selectedTaskForDetails"
+  [potentialDependencies]="potentialDependencies"
   (close)="closeTaskDetails()"
+  (saveDependencies)="onSaveDependencies($event)"
 />

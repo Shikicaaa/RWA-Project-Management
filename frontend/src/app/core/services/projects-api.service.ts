@@ -22,6 +22,7 @@ export interface CreateTaskDto {
     difficulty: TaskDifficulty;
     comments?: Comment[];
     status?: Task['status'];
+    dependencyIds?: string[]; 
 }
 
 export interface UpdateTaskDto{

@@ -86,7 +86,10 @@ export const tasksFeature = createFeature({
       };
 
       return tasksAdapter.updateOne({ id: taskId, changes: updatedTask }, state);
-    })
+    }),
+    on(TasksActions.setDependenciesSuccess, (state, { task }) => {
+      return tasksAdapter.updateOne(task, state);
+    }),
   ),
   
 });

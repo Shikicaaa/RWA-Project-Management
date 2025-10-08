@@ -47,4 +47,8 @@ export class TasksApiService {
     return this.http.post<Comment>(`${this.apiUrl}/${taskId}/comments`, { content });
   }
 
+  setDependencies(taskId: string, dependencyIds: string[]): Observable<Task> {
+    return this.http.patch<Task>(`${this.apiUrl}/${taskId}/dependencies`, { dependencyIds });
+  }
+
 }

@@ -2,12 +2,12 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, map, Observable, Subject, switchMap, takeUntil } from 'rxjs';
+import { combineLatest, filter, map, Observable, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { Project } from '../../models/project.model';
 import { User } from '../../models/user.model';
 import { ProjectsActions } from '../state/projects.actions';
 import { projectsFeature } from '../state/projects.reducer';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task, TaskDifficulty, TaskStatus } from '../../models/task.model';
 import { selectAll as selectAllTasks } from '../../tasks/state/tasks.reducer';
 import { TasksActions } from '../../tasks/state/tasks.actions';
@@ -32,6 +32,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
   project$!: Observable<Project | undefined>;
   currentUser$!: Observable<User | null>;
+  allTasksInProject$!: Observable<Task[]>;
   todoTasks$!: Observable<Task[]>;
   inProgressTasks$!: Observable<Task[]>;
   doneTasks$!: Observable<Task[]>;
@@ -46,20 +47,13 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   constructor() {}
 
   selectedTaskForDetails: Task | null = null;
-  
-  openTaskDetails(task: Task): void {
-    this.selectedTaskForDetails = task;
-  }
-
-  closeTaskDetails(): void {
-    this.selectedTaskForDetails = null;
-
-}
+  potentialDependencies: Task[] = [];
 
   taskForm = this.fb.group({
     title: ['', Validators.required],
     description: [''],
     difficulty: [TaskDifficulty.EASY, Validators.required],
+    dependencyIds: new FormControl<string[]>([])
   });
 
   addMemberForm = this.fb.group({
@@ -73,45 +67,45 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.currentUser$ = this.store.select(selectUser);
     this.listenForAddMemberStatus();
-    const projectId$ = this.route.params.pipe(
-      map((params) => params['id']),
-      filter((id) => !!id)
-    );
+    this.actions$.pipe(ofType(TasksActions.updateTaskSuccess), takeUntil(this.destroy$)).subscribe(() => { this.store.dispatch(ProjectsActions.loadProject({ id: this.currentProjectId })); });
 
-    this.actions$.pipe(
-      ofType(TasksActions.updateTaskSuccess),
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      console.log('Reloading project after task update');
-      this.store.dispatch(ProjectsActions.loadProject({ id: this.currentProjectId }));
-    });
-
-    projectId$.subscribe((id) => (this.currentProjectId = id));
+    const projectId$ = this.route.params.pipe(map(params => params['id']), filter(id => !!id));
+    projectId$.subscribe(id => this.currentProjectId = id);
     this.project$ = projectId$.pipe(
-      map((id) => {
-        this.store.dispatch(ProjectsActions.loadProject({ id }));
-        return id;
-      }),
-      switchMap((id) =>
-        this.store.select(projectsFeature.selectEntities).pipe(map((entities) => entities[id]))
-      )
+      map(id => { this.store.dispatch(ProjectsActions.loadProject({ id })); return id; }),
+      switchMap(id => this.store.select(projectsFeature.selectEntities).pipe(map(entities => entities[id])))
     );
-    const allTasksInProject$ = combineLatest([projectId$, this.store.select(selectAllTasks)]).pipe(
-      map(([projectId, tasks]) => tasks.filter((task) => task.project?.id === projectId))
+    this.allTasksInProject$ = combineLatest([projectId$, this.store.select(selectAllTasks)]).pipe(
+      map(([projectId, tasks]) => tasks.filter(task => task.project?.id === projectId))
     );
-    this.todoTasks$ = allTasksInProject$.pipe(
-      map((tasks) => tasks.filter((t) => t.status === TaskStatus.TO_DO))
-    );
-    this.inProgressTasks$ = allTasksInProject$.pipe(
-      map((tasks) => tasks.filter((t) => t.status === TaskStatus.IN_PROGRESS))
-    );
-    this.doneTasks$ = allTasksInProject$.pipe(
-      map((tasks) => tasks.filter((t) => t.status === TaskStatus.DONE))
-    );
+    this.todoTasks$ = this.allTasksInProject$.pipe(map(tasks => tasks.filter(t => t.status === TaskStatus.TO_DO)));
+    this.inProgressTasks$ = this.allTasksInProject$.pipe(map(tasks => tasks.filter(t => t.status === TaskStatus.IN_PROGRESS)));
+    this.doneTasks$ = this.allTasksInProject$.pipe(map(tasks => tasks.filter(t => t.status === TaskStatus.DONE)));
   }
 
   trackByTaskId(index: number, task: Task): string {
     return task.id;
+  }
+
+  openTaskDetails(task: Task): void {
+    this.allTasksInProject$.pipe(take(1)).subscribe(allTasks => {
+      this.potentialDependencies = allTasks.filter(t => t.id !== task.id);
+      this.selectedTaskForDetails = task;
+    });
+  }
+
+  closeTaskDetails(): void {
+    this.selectedTaskForDetails = null;
+  }
+
+  onSaveDependencies(event: { taskId: string, dependencyIds: string[] }): void {
+    this.store.dispatch(TasksActions.setDependencies(event));
+    this.closeTaskDetails();
+  }
+
+  hasUnmetDependencies(task: Task): boolean {
+    if (!task.dependencies || task.dependencies.length === 0) { return false; }
+    return task.dependencies.some(dep => dep.status !== TaskStatus.DONE);
   }
 
   onTaskDrop(event: CdkDragDrop<Task[]>): void {
@@ -144,9 +138,11 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   onTaskCreateSubmit(): void {
     if (this.taskForm.invalid) return;
     const taskData = this.taskForm.getRawValue() as CreateTaskDto;
+    
     this.store.dispatch(TasksActions.createTask({ projectId: this.currentProjectId, taskData }));
+    
     this.showCreateTaskForm = false;
-    this.taskForm.reset({ difficulty: TaskDifficulty.EASY });
+    this.taskForm.reset({ difficulty: TaskDifficulty.EASY, dependencyIds: [] });
   }
   onAddMemberSubmit(): void {
     if (this.addMemberForm.invalid) return;

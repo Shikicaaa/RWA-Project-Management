@@ -54,14 +54,31 @@ export class TasksService {
   }
 
   async updateTask(id: string, updateTaskDto: any, user: User): Promise<Task> {
-    const task = await this.tasksRepository.findOneBy({ id });
+    const task = await this.tasksRepository.findOne({
+      where: { id },
+      relations: ['project', 'project.members', 'dependencies'],
+    });
+    
     if (!task) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
     }
     
-    await this.getTaskById(id, user);
+    const isMember = task.project.members.some(member => member.id === user.id);
+    if(!isMember) {
+        throw new UnauthorizedException('You are not a member of this project');
+    }
 
     const { title, description, difficulty, status } = updateTaskDto;
+
+    if (status && status === TaskStatus.IN_PROGRESS && task.dependencies.length > 0) {
+      const unmetDependencies = task.dependencies.filter(dep => dep.status !== TaskStatus.DONE);
+
+      if (unmetDependencies.length > 0) {
+        const unmetNames = unmetDependencies.map(dep => dep.title).join(', ');
+        throw new BadRequestException(`Tasks: ${unmetNames} must be completed first.`);
+      }
+    }
+
     if(title !== undefined) task.title = title;
     if(description !== undefined) task.description = description;
     if(status !== undefined) task.status = status;
@@ -77,10 +94,7 @@ export class TasksService {
   }
 
   async createTask(createTaskDto: any, projectId: string, user: User): Promise<Task> {
-    const project = await this.projectsRepository.findOne({ 
-      where: { id: projectId }, 
-      relations: ['owner', 'members']
-    });
+    const project = await this.projectsRepository.findOne({ where: { id: projectId }, relations: ['owner', 'members'] });
     if (!project) {
         throw new NotFoundException('Project not found');
     }
@@ -93,8 +107,13 @@ export class TasksService {
         throw new UnauthorizedException('You do not have permission to create tasks in this project.');
     }
 
-    const { title, description, difficulty } = createTaskDto;
+    const { title, description, difficulty, dependencyIds } = createTaskDto;
     const xpValue = this.getXpForDifficulty(difficulty);
+
+    let dependencies: Task[] = [];
+    if (dependencyIds && dependencyIds.length > 0) {
+      dependencies = await this.tasksRepository.findBy({ id: In(dependencyIds) });
+    }
 
     const task = this.tasksRepository.create({
       title,
@@ -104,6 +123,7 @@ export class TasksService {
       project,
       creator: user,
       assignees: [],
+      dependencies,
     });
 
     return this.tasksRepository.save(task);
@@ -188,6 +208,19 @@ export class TasksService {
     }
 
     task.assignees = membersToAssign;
+    return this.tasksRepository.save(task);
+  }
+
+  async setDependencies(taskId: string, dependencyIds: string[], user: User): Promise<Task> {
+    const task = await this.getTaskById(taskId, user); 
+    
+    if (dependencyIds.length > 0) {
+      const dependencies = await this.tasksRepository.findBy({ id: In(dependencyIds) });
+      task.dependencies = dependencies;
+    } else {
+      task.dependencies = [];
+    }
+    
     return this.tasksRepository.save(task);
   }
 }

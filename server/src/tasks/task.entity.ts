@@ -57,4 +57,15 @@ export class Task {
 
   @OneToMany(() => Comment, (comment) => comment.task, { eager: true, cascade: true })
   comments: Comment[];
+
+  @ManyToMany(() => Task, task => task.blocking)
+  @JoinTable({
+    name: 'task_dependencies',
+    joinColumn: { name: 'taskId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'dependencyId', referencedColumnName: 'id' },
+  })
+  dependencies: Task[];
+
+  @ManyToMany(() => Task, task => task.dependencies)
+  blocking: Task[];
 }

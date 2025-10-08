@@ -67,4 +67,16 @@ export const TasksActions = {
     '[Tasks API] Create Comment Failure',
     props<{ error: any }>()
   ),
+  setDependencies: createAction(
+    '[Task Details] Set Dependencies',
+    props<{ taskId: string; dependencyIds: string[] }>()
+  ),
+  setDependenciesSuccess: createAction(
+    '[Tasks API] Set Dependencies Success',
+    props<{ task: Update<Task> }>()
+  ),
+  setDependenciesFailure: createAction(
+    '[Tasks API] Set Dependencies Failure',
+    props<{ error: any }>()
+  ),
 };

@@ -76,4 +76,17 @@ export class TasksEffects {
       )
     )
   );
+  setDependencies$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(TasksActions.setDependencies),
+      switchMap(({ taskId, dependencyIds }) =>
+        this.tasksApiService.setDependencies(taskId, dependencyIds).pipe(
+          map(updatedTask => TasksActions.setDependenciesSuccess({
+            task: { id: updatedTask.id, changes: updatedTask }
+          })),
+          catchError(error => of(TasksActions.setDependenciesFailure({ error })))
+        )
+      )
+    )
+  );
 }
