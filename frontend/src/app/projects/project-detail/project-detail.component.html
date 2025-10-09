@@ -8,9 +8,18 @@
 
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
     <div class="lg:col-span-9">
-      <div class="flex items-center justify-between mb-4">
-        <h4 class="text-xl font-semibold text-text-main dark:text-gray-200">Tasks</h4>
-        <button (click)="showCreateTaskForm = !showCreateTaskForm" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">{{ showCreateTaskForm ? 'Cancel' : '+ New Task' }}</button>
+      <div *ngIf="project && currentUser$ | async as currentUser">
+        <ng-container *ngIf="project.owner.id === currentUser.id || currentUser.role === 'admin' || currentUser.role === 'project_manager'">
+
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xl font-semibold text-text-main dark:text-gray-200">Tasks</h4>
+            <button (click)="showCreateTaskForm = !showCreateTaskForm" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">{{ showCreateTaskForm ? 'Cancel' : '+ New Task' }}</button>
+          </div>
+
+          <form *ngIf="showCreateTaskForm" [formGroup]="taskForm" (ngSubmit)="onTaskCreateSubmit()" class="p-4 mb-6 space-y-4 shadow-sm bg-background-light dark:bg-primary-dark rounded-lg">
+            </form>
+
+        </ng-container>
       </div>
 
       <form *ngIf="showCreateTaskForm" [formGroup]="taskForm" (ngSubmit)="onTaskCreateSubmit()" class="p-4 mb-6 space-y-4 shadow-sm bg-background-light dark:bg-primary-dark rounded-lg">

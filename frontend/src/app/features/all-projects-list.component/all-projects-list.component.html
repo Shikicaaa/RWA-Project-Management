@@ -12,12 +12,25 @@
       <div *ngIf="projects.length > 0; else noProjects" class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2 lg:grid-cols-3">
         
         <a *ngFor="let project of projects" [routerLink]="['/projects', project.id]" 
-           class="block p-6 transition-all duration-300 bg-white dark:bg-primary-dark border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 dark:hover:shadow-accent/40 hover:border-accent">
-          <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main dark:text-gray-200">{{ project.name }}</h5>
-          <p class="font-normal text-text-secondary dark:text-gray-400">{{ project.description || 'No description available.' }}</p>
-          <span class="block mt-4 text-xs font-medium text-primary-dark dark:text-accent-light">Owner: {{ project.owner.email }}</span>
-        </a>
+          class="block p-6 transition-all duration-300 bg-white dark:bg-primary-dark border-2 border-transparent rounded-lg shadow-md hover:shadow-primary/40 dark:hover:shadow-accent/40 hover:border-accent">
+          
+          <div class="flex justify-between items-start">
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-text-main dark:text-gray-200">{{ project.name }}</h5>
+            <span class="text-xs font-medium text-primary-dark dark:text-accent-light">Owner: {{ project.owner.email }}</span>
+          </div>
 
+          <p class="font-normal text-text-secondary dark:text-gray-400">{{ project.description || 'No description available.' }}</p>
+          
+          <div class="mt-4">
+            <div class="flex justify-between mb-1">
+              <span class="text-xs font-medium text-text-secondary dark:text-gray-400">Progress</span>
+              <span class="text-xs font-medium text-text-secondary dark:text-gray-400">{{ calculateProgress(project) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-primary-light/10 rounded-full h-1.5">
+              <div class="bg-primary dark:bg-accent h-1.5 rounded-full" [style.width]="calculateProgress(project) + '%'"></div>
+            </div>
+          </div>
+        </a>
       </div>
     </div>
     <ng-template #noProjects>

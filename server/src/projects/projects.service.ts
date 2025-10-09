@@ -28,6 +28,7 @@ export class ProjectsService {
     return this.projectsRepository
       .createQueryBuilder('project')
       .leftJoinAndSelect('project.owner', 'owner')
+      .leftJoinAndSelect('project.tasks', 'task')
       .leftJoin('project.members', 'member')
       .where('member.id = :userId', { userId: user.id })
       .distinct(true)

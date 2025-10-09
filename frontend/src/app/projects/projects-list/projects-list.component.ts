@@ -53,6 +53,14 @@ export class ProjectsListComponent implements OnInit {
     );
   }
 
+  calculateProgress(project: Project): number {
+    if (!project.tasks || project.tasks.length === 0) {
+      return 0;
+    }
+    const doneTasks = project.tasks.filter(t => t.status === 'done').length;
+    return Math.round((doneTasks / project.tasks.length) * 100);
+  }
+
   toggleCreateForm(): void {
     this.showCreateForm = !this.showCreateForm;
     this.projectForm.reset();

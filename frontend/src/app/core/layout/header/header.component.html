@@ -1,37 +1,54 @@
-<header class="shadow-md bg-background-light dark:bg-primary-dark dark:border-b dark:border-primary-light/10">
+<header class="relative shadow-md bg-background-light dark:bg-primary-dark dark:border-b dark:border-primary-light/10">
   <nav class="container flex items-center justify-between p-4 mx-auto">
     <a routerLink="/" class="text-xl font-bold text-primary-dark dark:text-accent-light">ProjectManager</a>
     
-    <div *ngIf="isAuthenticated$ | async" class="flex items-center space-x-4">
-      <div *ngIf="user$ | async as user" class="flex items-center space-x-4 text-sm text-text-secondary dark:text-gray-300">
-        
-        <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" class="font-medium hover:text-primary dark:hover:text-accent-light">All Projects</a>
-        <a *ngIf="user.role === 'admin'" routerLink="/admin" class="font-medium hover:text-primary dark:hover:text-accent-light">Admin Panel</a>
-        
-        <div *ngIf="levelProgress$ | async as progress" class="flex items-center space-x-2 w-48">
-          <span class="font-bold text-primary dark:text-accent-light">Lvl {{ progress.level }}</span>
-          <div class="w-full bg-primary-light/50 dark:bg-gray-700 rounded-full h-2.5">
-            <div class="bg-primary dark:bg-accent h-2.5 rounded-full" [style.width]="progress.percentage + '%'"></div>
+    <div class="hidden md:flex items-center space-x-4">
+      <div *ngIf="isAuthenticated$ | async">
+        <div *ngIf="user$ | async as user" class="flex items-center space-x-4 text-sm text-text-secondary dark:text-gray-300">
+          <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" class="font-medium hover:text-primary dark:hover:text-accent-light">All Projects</a>
+          <a *ngIf="user.role === 'admin'" routerLink="/admin" class="font-medium hover:text-primary dark:hover:text-accent-light">Admin Panel</a>
+          <div *ngIf="levelProgress$ | async as progress" class="flex items-center space-x-2 w-48">
+            <span class="font-bold text-primary dark:text-accent-light">Lvl {{ progress.level }}</span>
+            <div class="w-full bg-primary-light/50 dark:bg-gray-700 rounded-full h-2.5">
+              <div class="bg-primary dark:bg-accent h-2.5 rounded-full" [style.width]="progress.percentage + '%'"></div>
+            </div>
           </div>
+          <div *ngIf="levelProgress$ | async as progress" class="text-xs text-gray-500 dark:text-gray-400">({{ progress.xp }} / {{ progress.requiredXp }} XP)</div>
+          <span>Welcome, <span class="font-medium text-text-main dark:text-white">{{ user.username }}</span></span>
         </div>
-        <div *ngIf="levelProgress$ | async as progress" class="text-xs text-gray-500 dark:text-gray-400">
-           ({{ progress.xp }} / {{ progress.requiredXp }} XP)
-        </div>
-
-        <span class="hidden md:inline">Welcome, <span class="font-medium text-text-main dark:text-white">{{ user.username }}</span></span>
       </div>
       <app-theme-toggle></app-theme-toggle>
-      <button 
-        (click)="logout()"
-        class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-red-600 hover:bg-red-700"
-      >
-        Logout
-      </button>
+      <button *ngIf="isAuthenticated$ | async" (click)="logout()" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-red-600 hover:bg-red-700">Logout</button>
+      <div *ngIf="!(isAuthenticated$ | async)" class="flex items-center space-x-4">
+        <a routerLink="/login" class="text-sm font-medium text-text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-accent-light">Login</a>
+        <a routerLink="/register" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">Register</a>
+      </div>
     </div>
 
-    <div *ngIf="!(isAuthenticated$ | async)" class="flex items-center space-x-4">
-      <a routerLink="/login" class="text-sm font-medium text-text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-accent-light">Login</a>
-      <a routerLink="/register" class="px-3 py-1 text-sm font-medium text-white transition-colors rounded-md bg-primary hover:bg-primary-dark">Register</a>
+    <div class="md:hidden flex items-center">
+        <app-theme-toggle></app-theme-toggle>
+        <button (click)="toggleMobileMenu()" class="p-2 rounded-md text-text-secondary dark:text-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+        </button>
     </div>
   </nav>
+
+  <div *ngIf="isMobileMenuOpen" class="md:hidden bg-background-light dark:bg-primary-dark border-t border-primary/20 dark:border-primary-light/10">
+    <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <div *ngIf="isAuthenticated$ | async">
+            <div *ngIf="user$ | async as user" class="flex flex-col space-y-2 text-sm text-text-secondary dark:text-gray-300">
+              <a *ngIf="user.role === 'admin' || user.role === 'project_manager'" routerLink="/all-projects" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md font-medium hover:text-primary dark:hover:text-accent-light">All Projects</a>
+              <a *ngIf="user.role === 'admin'" routerLink="/admin" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md font-medium hover:text-primary dark:hover:text-accent-light">Admin Panel</a>
+              <div class="px-3 py-2">
+                <span class="font-medium text-text-main dark:text-white">Welcome, {{ user.username }}</span>
+              </div>
+              <button (click)="logout(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50">Logout</button>
+            </div>
+        </div>
+        <div *ngIf="!(isAuthenticated$ | async)" class="flex flex-col space-y-2">
+          <a routerLink="/login" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-accent-light">Login</a>
+          <a routerLink="/register" (click)="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-text-secondary dark:text-gray-300 hover:text-primary dark:hover:text-accent-light">Register</a>
+        </div>
+    </div>
+  </div>
 </header>

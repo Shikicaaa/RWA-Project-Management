@@ -15,6 +15,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 })
 export class HeaderComponent {
   private store = inject(Store);
+  isMobileMenuOpen = false;
 
   isAuthenticated$ = this.store.select(selectIsAuthenticated);
   user$ = this.store.select(selectUser);
@@ -34,6 +35,10 @@ export class HeaderComponent {
       };
     })
   );
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
 
   logout() {
     this.store.dispatch(AuthActions.logout());
